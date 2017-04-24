@@ -216,7 +216,7 @@ flag_mode:
                 } else if(direction == '6') {
                     x = ++x % MAX;
                 } else if(direction == 'c' || direction == 'C') {
-                    goto check_mode;
+                    continue;
                 } else if(direction == '\n') {
                     value = Tablearray[y][x];
 
@@ -259,7 +259,7 @@ check_mode:
                 } else if(direction == '6') {
                     x = ++x % MAX;
                 } else if(direction == 'f' || direction == 'F') {
-                    goto flag_mode;
+                    continue;
                 }
 
                 else if(direction == '\n') {
@@ -267,7 +267,7 @@ check_mode:
                     if(value == 0)						// blank case
                         Uncoverblankcell(y, x);
                     else if(value == 99)				// mine case
-                        goto end_of_game;
+                        continue;
                     else if(value > 0 && value <= 8)	// number case (the next cell is a mine)
                         Tablearray[y][x] += 10;
 
@@ -289,7 +289,7 @@ check_mode:
         // exit
         case 'q':
         case 'Q':
-            goto end_of_game;
+            continue;
 
         default:
             break;
