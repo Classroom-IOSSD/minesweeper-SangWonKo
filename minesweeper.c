@@ -5,7 +5,7 @@
 #define MAX 10
 
 // background color
-#define KNRM  "\x1B[0m"
+#define BNRM  "\x1B[0m"
 #define BRED  "\x1B[41m"
 #define BGRN  "\x1B[42m"
 #define BYEL  "\x1B[43m"
@@ -14,31 +14,31 @@
 #define BCYN  "\x1B[46m"
 #define BWHT  "\x1B[47m"
 // text color
-#define KRED  "\x1B[31m"
-#define KGRN  "\x1B[32m"
-#define KYEL  "\x1B[33m"
-#define KBLU  "\x1B[34m"
-#define KMAG  "\x1B[35m"
-#define KCYN  "\x1B[36m"
-#define KWHT  "\x1B[37m"
+#define T_KRED  "\x1B[31m"
+#define T_KGRN  "\x1B[32m"
+#define T_KYEL  "\x1B[33m"
+#define T_KBLU  "\x1B[34m"
+#define T_KMAG  "\x1B[35m"
+#define T_KCYN  "\x1B[36m"
+#define T_KWHT  "\x1B[37m"
 
 
 // global variables
 // game table
-unsigned char table_array[MAX][MAX];
+unsigned char Tablearray[MAX][MAX];
 // location of cursor
 int x=0, y=0;
 // flag: input mode = 0, flag mode = 1, check mode = 2
-int game_mode=0;
+int Gamemode=0;
 
 /*This is a recursive function which uncovers blank cells while they are adjacent*/
-int uncover_blank_cell(int row, int col) {
+int Uncoverblankcell(int row, int col) {
     int value, rows[8], columns[8], i;
 
-    if(table_array[row][col] != 0)
+    if(Tablearray[row][col] != 0)
         return 0; // error
 
-    table_array[row][col] += 10; // uncover current cell
+    Tablearray[row][col] += 10; // uncover current cell
 
     // Get position of adjacent cells of current cell
     rows[0] = row - 1;
@@ -59,13 +59,13 @@ int uncover_blank_cell(int row, int col) {
     columns[7] = col - 1;
 
     for(i = 0; i < 8; i++) {
-        value = table_array[rows[i]][columns[i]];
+        value = Tablearray[rows[i]][columns[i]];
 
         if( (rows[i] >= 0 && rows[i] < MAX) && (columns[i] >= 0 && columns[i] < MAX) ) {	// to prevent negative index and out of bounds
             if(value > 0 && value <= 8)
-                table_array[rows[i]][columns[i]] += 10;										// it is a cell with 1-8 number so we need to uncover
+                Tablearray[rows[i]][columns[i]] += 10;										// it is a cell with 1-8 number so we need to uncover
             else if(value == 0)
-                uncover_blank_cell(rows[i], columns[i]);
+                Uncoverblankcell(rows[i], columns[i]);
         }
 
     }
@@ -73,7 +73,7 @@ int uncover_blank_cell(int row, int col) {
     return 1; // success!
 }
 
-void print_table() {
+void Printtable() {
     // clear screen
     system("clear");
 
@@ -81,27 +81,27 @@ void print_table() {
     for(i = 0; i < MAX; i++) {
         for(j = 0; j < MAX; j++) {
             if(x == j && y == i) {
-                if(game_mode == 1) {
-                    printf("|%sF%s",BMAG,KNRM);
+                if(Gamemode == 1) {
+                    printf("|%sF%s",BMAG,BNRM);
                     continue;
-                } else if(game_mode == 2) {
-                    printf("|%sC%s",BMAG,KNRM);
+                } else if(Gamemode == 2) {
+                    printf("|%sC%s",BMAG,BNRM);
                     continue;
                 }
 
             }
-            value = table_array[i][j];
+            value = Tablearray[i][j];
 
             if((value >= 0 && value <= 8) || value == 0 || value == 99)
                 printf("|X");
             else if(value == 10) // clean area
-                printf("|%s%d%s",KCYN, value - 10,KNRM);
+                printf("|%s%d%s",T_KCYN, value - 10,BNRM);
             else if(value == 11) // the number of near mine is 1
-                printf("|%s%d%s",KYEL, value - 10,KNRM);
+                printf("|%s%d%s",T_KYEL, value - 10,BNRM);
             else if(value > 11 && value <= 18) // the number of near mine is greater than 1
-                printf("|%s%d%s",KRED, value - 10,KNRM);
+                printf("|%s%d%s",T_KRED, value - 10,BNRM);
             else if((value >= 20 && value <= 28) || value == 100)
-                printf("|%sF%s",KGRN,KNRM);
+                printf("|%sF%s",T_KGRN,BNRM);
             else
                 printf("ERROR"); // test purposes
 
@@ -109,12 +109,12 @@ void print_table() {
         printf("|\n");
     }
 
-    printf("cell values: 'X' unknown, '%s0%s' no mines close, '1-8' number of near mines, '%sF%s' flag in cell\n",KCYN,KNRM,KGRN,KNRM);
-    if(game_mode == 0) {
+    printf("cell values: 'X' unknown, '%s0%s' no mines close, '1-8' number of near mines, '%sF%s' flag in cell\n",T_KCYN,BNRM,T_KGRN,BNRM);
+    if(Gamemode == 0) {
         printf("f (put/remove Flag in cell), c (Check cell), n (New game), q (Exit game): ");
-    } else if(game_mode == 1) {
+    } else if(Gamemode == 1) {
         printf("Enter (select to put/remove Flag in cell), q (Exit selection): ");
-    } else if(game_mode == 2) {
+    } else if(Gamemode == 2) {
         printf("Enter (select to check cell), q (Exit selection): ");
     }
 
@@ -125,14 +125,14 @@ void print_table() {
 int main(int argc, char *argv[]) {
 
     char ch;
-    int nMines; // the number of the remaining mines
+    int NumMines; // the number of the remaining mines
     int i,j,r,c,value, rows[8], columns[8];
 
 new_game:
     // the number of mines
-    nMines = 10;
+    NumMines = 10;
     if(argc == 2) {
-        nMines = atoi(argv[1]);
+        NumMines = atoi(argv[1]);
     }
     srand (time(NULL));						// random seed
     // setting cursor
@@ -141,17 +141,17 @@ new_game:
     // set all cells to 0
     for(i = 0; i < 10; i++)
         for(j = 0; j < 10; j++)
-            table_array[i][j] = 0;
+            Tablearray[i][j] = 0;
 
-    for(i = 0; i < nMines; i++) {
+    for(i = 0; i < NumMines; i++) {
         /* initialize random seed: */
 
         r = rand() % 10;					// it generates a integer in the range 0 to 9
         c = rand() % 10;
 
         // put mines
-        if(table_array[r][c] != 99) {
-            table_array[r][c] = 99;
+        if(Tablearray[r][c] != 99) {
+            Tablearray[r][c] = 99;
 
             // Get position of adjacent cells of current cell
             rows[0] = r - 1;
@@ -172,10 +172,10 @@ new_game:
             columns[7] = c - 1;
 
             for(j = 0; j < 8; j++) {
-                value = table_array[rows[j]][columns[j]];
+                value = Tablearray[rows[j]][columns[j]];
                 if( (rows[j] >= 0 && rows[j] < MAX) && (columns[j] >= 0 && columns[j] < MAX) ) {	// to prevent negative index and out of bounds
                     if(value != 99)																// to prevent remove mines
-                        table_array[rows[j]][columns[j]] += 1;									// sums 1 to each adjacent cell
+                        Tablearray[rows[j]][columns[j]] += 1;									// sums 1 to each adjacent cell
                 }
             }
 
@@ -186,8 +186,8 @@ new_game:
     }
 
     //
-    while(nMines != 0) {			// when nMines becomes 0 you will win the game
-        print_table();
+    while(NumMines != 0) {			// when NumMines becomes 0 you will win the game
+        Printtable();
 
         ch = getch();
         // cursor direction
@@ -200,9 +200,9 @@ new_game:
 
 
 flag_mode:
-            game_mode = 1;
+            Gamemode = 1;
             do {
-                print_table();
+                Printtable();
                 direction = getch();
                 // arrow direction
                 if(direction == '8') {
@@ -216,24 +216,24 @@ flag_mode:
                 } else if(direction == '6') {
                     x = ++x % MAX;
                 } else if(direction == 'c' || direction == 'C') {
-                    goto check_mode;
+                    continue;
                 } else if(direction == '\n') {
-                    value = table_array[y][x];
+                    value = Tablearray[y][x];
 
                     if (value == 99) {				// mine case
-                        table_array[y][x] += 1;
-                        nMines -= 1;				// mine found
+                        Tablearray[y][x] += 1;
+                        NumMines -= 1;				// mine found
                     } else if(value >= 0 && value <= 8) {	// number of mines case (the next cell is a mine)
-                        table_array[y][x] += 20;
+                        Tablearray[y][x] += 20;
                     } else if(value >= 20 && value <= 28) {
-                        table_array[y][x] -= 20;
+                        Tablearray[y][x] -= 20;
                     }
 
-                    if(nMines == 0)
+                    if(NumMines == 0)
                         break;
                 }
             } while (direction != 'q' && direction != 'Q');
-            game_mode = 0;
+            Gamemode = 0;
 
             break;
 
@@ -242,9 +242,9 @@ flag_mode:
         case 'C':
 
 check_mode:
-            game_mode = 2;
+            Gamemode = 2;
             do {
-                print_table();
+                Printtable();
                 direction = getch();
 
                 // arrow direction
@@ -259,22 +259,22 @@ check_mode:
                 } else if(direction == '6') {
                     x = ++x % MAX;
                 } else if(direction == 'f' || direction == 'F') {
-                    goto flag_mode;
+                    continue;
                 }
 
                 else if(direction == '\n') {
-                    value = table_array[y][x];
+                    value = Tablearray[y][x];
                     if(value == 0)						// blank case
-                        uncover_blank_cell(y, x);
+                        Uncoverblankcell(y, x);
                     else if(value == 99)				// mine case
-                        goto end_of_game;
+                        continue;
                     else if(value > 0 && value <= 8)	// number case (the next cell is a mine)
-                        table_array[y][x] += 10;
+                        Tablearray[y][x] += 10;
 
                     //	break;
                 }
             } while (direction != 'q' && direction != 'Q');
-            game_mode = 0;
+            Gamemode = 0;
 
             break;
 
@@ -289,7 +289,7 @@ check_mode:
         // exit
         case 'q':
         case 'Q':
-            goto end_of_game;
+            continue;
 
         default:
             break;
@@ -297,11 +297,11 @@ check_mode:
     }
 
 end_of_game:
-    game_mode = 0;
-    print_table();
+    Gamemode = 0;
+    Printtable();
     printf("\nGAME OVER\n");
 
-    if(nMines == 0)
+    if(NumMines == 0)
         printf("you won!!!!\n");
 
     else
